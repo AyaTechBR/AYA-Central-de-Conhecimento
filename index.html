@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AYA Academy | Central de Conhecimento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- GSAP + ScrollTrigger + Lenis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html.lenis,
+        html.lenis body {
+            height: auto;
+        }
+
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg,
+                    #030712 0%,
+                    #0a0f1a 30%,
+                    #0f172a 60%,
+                    #0a0f1a 80%,
+                    #030712 100%);
+            background-attachment: fixed;
+            color: #f8fafc;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+            z-index: 9999;
+            transform-origin: left;
+            transform: scaleX(0);
+        }
+
+        /* Glass morphism cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.15);
+        }
+
+        /* Aurora blob that follows mouse */
+        .aurora-blob {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle,
+                    rgba(99, 102, 241, 0.15) 0%,
+                    rgba(139, 92, 246, 0.1) 30%,
+                    rgba(236, 72, 153, 0.05) 60%,
+                    transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease;
+            filter: blur(40px);
+        }
+
+        /* Magnetic 3D card effect */
+        .magnetic-card {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .magnetic-card-inner {
+            transition: transform 0.1s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        .magnetic-card .card-shine {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                    rgba(255, 255, 255, 0.1) 0%,
+                    transparent 50%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: inherit;
+        }
+
+        .magnetic-card:hover .card-shine {
+            opacity: 1;
+        }
+
+        /* Hero gradient */
+        .hero-gradient {
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.3), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(139, 92, 246, 0.15), transparent),
+                radial-gradient(ellipse 50% 30% at 20% 80%, rgba(236, 72, 153, 0.1), transparent);
+        }
+
+        /* Animated gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981, #06b6d4, #6366f1, #8b5cf6);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        @keyframes gradientShift {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Section reveal */
+        .reveal-section {
+            opacity: 0;
+            transform: translateY(60px);
+        }
+
+        /* Floating badges */
+        .floating-badge {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            25% {
+                transform: translateY(-10px) rotate(2deg);
+            }
+
+            75% {
+                transform: translateY(5px) rotate(-2deg);
+            }
+        }
+
+        /* Question card hover glow */
+        .question-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .question-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .question-card:hover::before {
+            opacity: 1;
+        }
+
+        .question-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .question-card:hover::after {
+            left: 100%;
+        }
+
+        /* Category badge */
+        .category-badge {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        /* Arrow animation */
+        .arrow-icon {
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .question-card:hover .arrow-icon {
+            transform: translateX(8px);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(#6366f1, #8b5cf6);
+            border-radius: 3px;
+        }
+
+        .logo-aya {
+            filter: brightness(0) invert(1);
+            height: 40px;
+            width: auto;
+        }
+
+        .logo-aya-hero {
+            filter: brightness(0) invert(1);
+            height: 80px;
+            width: auto;
+        }
+
+        @media (max-width: 640px) {
+            .logo-aya-hero {
+                height: 60px;
+            }
+        }
+
+        /* Noise overlay for texture */
+        .noise-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        /* Glow effect on hero */
+        .hero-glow {
+            box-shadow: 0 0 80px rgba(99, 102, 241, 0.3),
+                0 0 120px rgba(139, 92, 246, 0.2);
+        }
+
+        /* Search input */
+        .search-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+
+        /* Pulse animation for "NEW" badge */
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+            }
+        }
+
+        .new-badge {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        /* Word Reveal Animation */
+        .word-reveal {
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .word-reveal-word {
+            display: inline-block;
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.6s ease;
+        }
+
+        .word-reveal-word.revealed {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .word-reveal-line {
+            display: block;
+            overflow: hidden;
+        }
+
+        /* Hero fade animation */
+        .hero-fade {
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1),
+                transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .hero-fade.visible {
+            opacity: 1 !important;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+    <!-- Progress Bar -->
+    <div class="progress-bar"></div>
+
+    <!-- Aurora Blob (follows mouse) -->
+    <div class="aurora-blob" id="auroraBlob"></div>
+
+    <!-- Hero Section -->
+    <header class="hero-gradient min-h-[70vh] flex items-center justify-center relative overflow-hidden noise-overlay">
+        <!-- Animated background orbs -->
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-[150px] animate-pulse"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/15 rounded-full blur-[120px] animate-pulse"
+            style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 right-1/3 w-64 h-64 bg-pink-500/10 rounded-full blur-[100px] animate-pulse"
+            style="animation-delay: 2s;"></div>
+
+        <!-- Floating particles container -->
+        <div id="particles" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+
+        <div class="max-w-5xl mx-auto px-6 relative z-10 text-center">
+            <!-- Logo -->
+            <div class="floating-badge mb-8">
+                <img src="assets/img/AYA.png" alt="AYA" class="logo-aya-hero mx-auto hero-glow rounded-2xl p-4">
+            </div>
+
+            <!-- Main Title with Word Reveal -->
+            <h1 class="hero-title text-4xl md:text-7xl font-black mb-6 leading-tight tracking-tight" id="heroTitle">
+                <span class="word-reveal-line">
+                    <span class="word-reveal"><span class="word-reveal-word text-white">Central</span></span>
+                    <span class="word-reveal"><span class="word-reveal-word text-white">de</span></span>
+                </span>
+                <span class="word-reveal-line">
+                    <span class="word-reveal"><span class="word-reveal-word gradient-text">Conhecimento</span></span>
+                </span>
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="hero-subtitle text-lg md:text-xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed mb-10 hero-fade"
+                style="opacity: 0;">
+                Descubra respostas detalhadas para as dúvidas mais frequentes sobre
+                <strong class="text-white">Inteligência Artificial</strong>, tecnologia e produtividade.
+            </p>
+
+            <!-- Search Box -->
+            <div class="max-w-xl mx-auto relative hero-fade" style="opacity: 0;">
+                <input type="text" id="searchInput" placeholder="Buscar dúvidas..."
+                    class="search-input w-full px-6 py-4 rounded-2xl text-white placeholder-slate-500 text-lg">
+                <svg class="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+
+            <!-- Stats -->
+            <div class="flex items-center justify-center gap-8 mt-12 text-sm hero-fade" style="opacity: 0;">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                    <span class="text-slate-400"><span class="font-bold text-white" id="questionCount">1</span>
+                        Artigos</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-indigo-400 rounded-full"></span>
+                    <span class="text-slate-400">Atualizado <span class="font-bold text-white">Dez 2025</span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Questions Section -->
+    <section class="py-20 px-6 relative">
+        <div class="max-w-5xl mx-auto">
+            <!-- Section Header -->
+            <div class="reveal-section mb-12 text-center">
+                <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Explore Nossas <span
+                        class="gradient-text">Análises</span></h2>
+                <p class="text-slate-400 text-lg max-w-xl mx-auto">Conteúdos aprofundados para você tomar melhores
+                    decisões sobre tecnologia e IA</p>
+            </div>
+
+            <!-- Questions Grid -->
+            <div class="grid gap-6" id="questionsGrid">
+
+                <!-- Question Card 1 -->
+                <a href="combos-ias-vale-a-pena.html"
+                    class="question-card glass-card magnetic-card rounded-2xl overflow-hidden group flex flex-col md:flex-row">
+                    <div class="card-shine"></div>
+
+                    <!-- Image Side -->
+                    <div class="md:w-96 flex-shrink-0" style="aspect-ratio: 16/7;">
+                        <img src="assets/img/combos-ias-capa.png" alt="Agregadores de IA vs LLMs Nativas"
+                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
+                    </div>
+
+                    <!-- Content Side -->
+                    <div class="p-5 md:p-6 flex flex-col justify-center flex-grow">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span
+                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-indigo-300">
+                                IA & Ferramentas
+                            </span>
+                            <span
+                                class="new-badge bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-emerald-500/30">
+                                Novo
+                            </span>
+                        </div>
+                        <h3
+                            class="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-indigo-300 transition-colors">
+                            Combos de IAs vale a pena?
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-3 line-clamp-2">
+                            Análise técnica comparando agregadores como Adapta One e Inner AI versus assinaturas diretas
+                            do ChatGPT Plus e Claude Pro.
+                        </p>
+                        <div
+                            class="flex items-center gap-2 text-indigo-400 text-xs font-semibold group-hover:gap-3 transition-all">
+                            <span>Ler análise</span>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Placeholder for future questions -->
+                <div class="coming-soon glass-card p-8 rounded-3xl opacity-40 border-dashed border-2 border-slate-700">
+                    <div class="flex items-center gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-slate-500 text-sm uppercase tracking-widest font-bold">Em breve</p>
+                            <p class="text-slate-600 text-sm mt-1">Mais conteúdos estão sendo preparados...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-16 px-6 border-t border-white/5">
+        <div class="max-w-5xl mx-auto text-center">
+            <img src="assets/img/AYA.png" alt="AYA" class="logo-aya mx-auto mb-6 opacity-40">
+            <p class="text-slate-600 text-sm">
+                Sua jornada de aprendizado em IA começa aqui.
+            </p>
+            <p class="text-slate-700 text-xs mt-4">
+                © 2025 AYA. Todos os direitos reservados.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lenis smooth scroll
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            orientation: 'vertical',
+            smoothWheel: true,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // GSAP ScrollTrigger integration
+        gsap.registerPlugin(ScrollTrigger);
+
+        lenis.on('scroll', ScrollTrigger.update);
+
+        gsap.ticker.add((time) => {
+            lenis.raf(time * 1000);
+        });
+
+        gsap.ticker.lagSmoothing(0);
+
+        // Progress bar
+        const progressBar = document.querySelector('.progress-bar');
+        window.addEventListener('scroll', () => {
+            const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+            progressBar.style.transform = `scaleX(${scrollPercent})`;
+        });
+
+        // Reveal animations
+        gsap.utils.toArray('.reveal-section').forEach((el) => {
+            gsap.to(el, {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 85%',
+                },
+            });
+        });
+
+        // Word Reveal Animation
+        const words = document.querySelectorAll('.word-reveal-word');
+        words.forEach((word, index) => {
+            setTimeout(() => {
+                word.classList.add('revealed');
+            }, 300 + (index * 150)); // 300ms initial delay, 150ms between each word
+        });
+
+        // Hero fade elements animation (after word reveal)
+        const heroFadeElements = document.querySelectorAll('.hero-fade');
+        heroFadeElements.forEach((el, index) => {
+            setTimeout(() => {
+                el.classList.add('visible');
+            }, 800 + (index * 200)); // Start after title animation, 200ms between each
+        });
+
+        gsap.from('.floating-badge', {
+            opacity: 0,
+            scale: 0.8,
+            duration: 1,
+            delay: 0.1,
+            ease: 'back.out(1.7)'
+        });
+
+        // Create floating particles
+        const particlesContainer = document.getElementById('particles');
+        const isMobile = window.innerWidth < 768;
+        const particleCount = isMobile ? 15 : 30;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 5 + 's';
+            particle.style.opacity = Math.random() * 0.5 + 0.2;
+            particlesContainer.appendChild(particle);
+
+            gsap.to(particle, {
+                y: -100 - Math.random() * 200,
+                x: (Math.random() - 0.5) * 100,
+                duration: 10 + Math.random() * 20,
+                repeat: -1,
+                ease: 'none',
+            });
+        }
+
+        // Search functionality - simplified to avoid display issues
+        const searchInput = document.getElementById('searchInput');
+        const questionsGrid = document.getElementById('questionsGrid');
+        const questionCards = questionsGrid.querySelectorAll('.question-card');
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+
+            questionCards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+
+                if (title.includes(query) || description.includes(query) || query === '') {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                    card.style.pointerEvents = 'auto';
+                } else {
+                    card.style.opacity = '0.2';
+                    card.style.transform = 'translateY(10px)';
+                    card.style.pointerEvents = 'none';
+                }
+            });
+        });
+
+        // ==========================================
+        // AURORA BLOB - Follows Mouse
+        // ==========================================
+        const auroraBlob = document.getElementById('auroraBlob');
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let blobX = mouseX;
+        let blobY = mouseY;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Smooth aurora movement
+        function animateAurora() {
+            // Smooth lerp (linear interpolation)
+            blobX += (mouseX - blobX) * 0.08;
+            blobY += (mouseY - blobY) * 0.08;
+
+            auroraBlob.style.left = blobX + 'px';
+            auroraBlob.style.top = blobY + 'px';
+
+            requestAnimationFrame(animateAurora);
+        }
+        animateAurora();
+
+        // ==========================================
+        // MAGNETIC 3D CARDS
+        // ==========================================
+        const magneticCards = document.querySelectorAll('.magnetic-card');
+
+        magneticCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = (y - centerY) / 15;
+                const rotateY = (centerX - x) / 15;
+
+                // Apply 3D rotation
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+
+                // Update shine position
+                const percentX = (x / rect.width) * 100;
+                const percentY = (y / rect.height) * 100;
+                card.style.setProperty('--mouse-x', percentX + '%');
+                card.style.setProperty('--mouse-y', percentY + '%');
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            });
+        });
+
+        // Hide aurora on mobile (no mouse)
+        if ('ontouchstart' in window) {
+            auroraBlob.style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

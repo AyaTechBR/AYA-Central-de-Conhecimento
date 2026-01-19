@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deep Research Battle | AYA Academy</title>
 
-    <!-- Design System -->
+    <!-- Design System: TailwindCSS and Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
@@ -16,73 +16,41 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#000000',
+                        foreground: '#ffffff',
+                        card: 'rgba(255, 255, 255, 0.03)',
+                        border: 'rgba(255, 255, 255, 0.1)',
+                        muted: { foreground: '#a1a1aa' }
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        /* [CORE] Reset & Base */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        html.lenis,
-        html.lenis body {
-            height: auto;
-        }
-
-        .lenis.lenis-smooth {
-            scroll-behavior: auto !important;
-        }
-
-        .lenis.lenis-smooth [data-lenis-prevent] {
-            overscroll-behavior: contain;
-        }
-
-        .lenis.lenis-stopped {
-            overflow: hidden;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #030712;
-            color: #f8fafc;
+            background-color: #000000;
+            color: #ffffff;
             overflow-x: hidden;
-            cursor: none;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* [CORE] Custom Cursor */
-        .custom-cursor {
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(244, 114, 182, 0.8);
-            border-radius: 50%;
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
-            mix-blend-mode: difference;
-            transition: transform 0.15s ease-out, width 0.2s, height 0.2s;
-        }
-
-        .custom-cursor.hover {
-            width: 50px;
-            height: 50px;
-            background: rgba(244, 114, 182, 0.1);
-        }
-
-        /* [CORE] Progress Bar */
-        .progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #fdba74, #fb923c, #e11d48, #7c3aed);
-            z-index: 9999;
-            transform-origin: left;
-            transform: scaleX(0);
-        }
-
-        /* [DESIGN] Glassmorphism */
-        .glass-card {
+        .glass {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -90,53 +58,83 @@
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .glass-card:hover {
+        .glass:hover {
             background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(244, 114, 182, 0.3);
             transform: translateY(-5px);
         }
 
-        /* [DESIGN] Gradients */
-        .hero-gradient {
-            background:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(244, 114, 182, 0.2), transparent),
-                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(124, 58, 237, 0.15), transparent);
-            pointer-events: none;
-        }
-
-        .gradient-text {
-            background: linear-gradient(to right, #fb923c, #f472b6, #a78bfa);
+        .text-gradient {
+            background: linear-gradient(to right, #ffffff, #a1a1aa, #ffffff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        /* [ANIMATIONS] Initial States */
-        .reveal-section,
-        .reveal-left,
-        .reveal-right,
-        .reveal-scale {
-            opacity: 0;
-        }
-
-        .reveal-left {
-            transform: translateX(-50px);
-        }
-
-        .reveal-right {
-            transform: translateX(50px);
-        }
-
-        .reveal-scale {
-            transform: scale(0.95);
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
+            pointer-events: none;
         }
 
         .logo-aya {
             filter: brightness(0) invert(1);
-            height: 30px;
+            height: 32px;
             width: auto;
-            flex-shrink: 0;
             object-fit: contain;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+
+
+        .back-button-floating {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+
+        .back-button-floating.visible {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .reveal-section {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.95);
         }
 
         /* [CUSTOM] Podium */
@@ -175,14 +173,14 @@
         }
 
         .comparison-table th {
-            background: linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(124, 58, 237, 0.2));
+            background: rgba(255, 255, 255, 0.05);
             padding: 1rem;
             text-align: center;
             font-weight: 800;
             text-transform: uppercase;
             font-size: 0.75rem;
             letter-spacing: 0.1em;
-            border-bottom: 2px solid rgba(244, 114, 182, 0.3);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         }
 
         .comparison-table th:first-child {
@@ -209,250 +207,130 @@
             transition: transform 0.3s ease;
         }
 
-        /* [RESPONSIVE] Mobile-specific adjustments */
         @media (max-width: 768px) {
-
-            /* Hero title adjustments */
-            .hero-title {
+            h1 {
                 font-size: 2.5rem !important;
+                line-height: 1.1 !important;
             }
 
-            .hero-subtitle {
-                font-size: 1rem !important;
-                padding: 0 1rem;
+            h2 {
+                font-size: 2.25rem !important;
             }
 
-            /* Glass cards padding reduction */
-            .glass-card {
+            .glass {
                 padding: 1.5rem !important;
             }
 
-            /* Podium - stack vertically on mobile */
-            .podium-container {
-                flex-direction: column !important;
-                height: auto !important;
-                align-items: stretch !important;
-                gap: 1rem !important;
+            .orb {
+                width: 250px !important;
+                height: 250px !important;
             }
 
-            .podium-container>div {
-                display: flex !important;
-                flex-direction: column !important;
-                align-items: stretch !important;
+            .back-button-floating {
+                top: 1rem;
+                left: 1rem;
             }
 
-            .podium-step {
-                width: 100% !important;
-                height: auto !important;
-                padding: 2rem 1rem !important;
-                border-radius: 1rem !important;
-            }
-
-            /* Ranking cards - prevent overflow */
-            #ranking-list .glass-card,
-            #ranking-list .ranking-card {
-                max-width: 100%;
-                width: calc(100vw - 3rem) !important;
-                margin-left: auto;
-                margin-right: auto;
-                box-sizing: border-box;
-                overflow-x: hidden;
-            }
-
-            #ranking-list .ranking-card .flex {
-                flex-wrap: wrap;
-            }
-
-            /* Detailed scores table - sticky first column */
+            /* Table Responsive */
             .comparison-table th:first-child,
             .comparison-table td:first-child {
                 position: sticky;
                 left: 0;
-                background: #030712;
+                background: #000;
                 z-index: 20;
-                min-width: 140px;
-                padding-right: 0.75rem;
                 box-shadow: 2px 0 8px rgba(0, 0, 0, 0.5);
             }
 
-            .comparison-table th:first-child {
-                z-index: 21;
-                background: linear-gradient(135deg, #1e1433, #1a0f2e);
+            .podium-container {
+                flex-direction: column !important;
             }
 
-            /* Other headers should be below the first column */
-            .comparison-table th:not(:first-child) {
-                z-index: 10;
-                background: linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(124, 58, 237, 0.2));
-            }
-
-            /* Reduce table font size */
-            table {
-                font-size: 0.75rem !important;
-            }
-
-            table th,
-            table td {
-                padding: 0.5rem !important;
-            }
-
-            /* Navigation cards - 2 columns on mobile */
-            .grid.grid-cols-2 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            /* Mini summary navigation - grid on mobile */
-            .max-w-5xl .glass-card {
-                padding: 0.5rem !important;
-            }
-
-            .max-w-5xl .glass-card>div {
-                display: grid !important;
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 0.5rem !important;
-            }
-
-            .max-w-5xl .glass-card a {
-                padding: 0.75rem !important;
-                font-size: 0.875rem;
-            }
-
-            .max-w-5xl .glass-card .w-px {
-                display: none !important;
-            }
-
-            /* Ranking cards */
-            .ranking-card {
-                margin-bottom: 0.75rem;
-            }
-
-            .ranking-content {
-                padding: 1rem !important;
-            }
-
-            /* Hide cursor on touch devices */
-            .custom-cursor {
-                display: none !important;
-            }
-        }
-
-        @media (max-width: 640px) {
-
-            /* Further adjustments for very small screens */
-            .hero-title {
-                font-size: 2rem !important;
-            }
-
-            h2 {
-                font-size: 2rem !important;
-            }
-
-            h3 {
-                font-size: 1.25rem !important;
-            }
-
-            /* Quick stats - 2 columns only */
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 1rem;
-            }
-
-            /* Chart containers */
-            .chart-container {
-                height: 250px !important;
-            }
-
-            /* Insights cards */
-            #insights-container .glass-card {
-                padding: 1.25rem !important;
-            }
-
-            /* Fixed bottom bar */
-            .fixed.bottom-0 {
-                font-size: 0.6rem !important;
-                padding: 0.75rem !important;
+            #ranking-list .glass,
+            #ranking-list .ranking-card {
+                width: 100% !important;
             }
         }
     </style>
 </head>
 
-<body class="antialiased selection:bg-rose-500/30">
+<body class="selection:bg-white/20">
 
-    <!-- Custom Cursor & Progress Bar -->
-    <div class="custom-cursor hidden md:block"></div>
-    <div class="progress-bar"></div>
+    <!-- Background Orbs (Modern atmosphere) -->
+    <div class="fixed inset-0 overflow-hidden z-0">
+        <div class="orb w-[500px] h-[500px] bg-white/10 top-[-10%] left-[-10%] animate-pulse"></div>
+        <div class="orb w-[600px] h-[600px] bg-white/5 bottom-[-20%] right-[-10%] animate-pulse"
+            style="animation-delay: 2s;"></div>
+        <div class="orb w-[400px] h-[400px] bg-zinc-800/10 top-[40%] left-[60%] animate-pulse"
+            style="animation-delay: 4s;"></div>
+    </div>
 
-    <!-- Header / Navigation -->
-    <header class="fixed top-0 left-0 w-full p-6 z-50 flex justify-between items-center mix-blend-difference">
+
+
+    <!-- Top Navigation (Flows with scroll) -->
+    <nav class="relative z-10 w-full pt-10 px-6">
+        <div class="container mx-auto flex items-center justify-between">
+            <a href="index.html"
+                class="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-zinc-400 hover:text-white transition-colors group">
+                <i data-lucide="arrow-left" class="w-4 h-4 group-hover:-translate-x-1 transition-transform"></i>
+                Voltar
+            </a>
+            <img src="assets/img/AYA.png" alt="AYA" class="logo-aya">
+        </div>
+    </nav>
+
+    <!-- Floating Back Button (Visible on scroll) -->
+    <div class="back-button-floating" id="floatingBack">
         <a href="index.html"
-            class="flex items-center gap-2 text-sm font-bold tracking-widest uppercase hover:text-rose-400 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
+            class="glass px-5 py-3 rounded-full flex items-center gap-3 text-xs font-extrabold tracking-widest uppercase text-white hover:bg-white/10 transition-all">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
             Voltar
         </a>
-    </header>
+    </div>
 
-    <!-- Hero Section -->
-    <section class="min-h-screen relative flex items-center justify-center p-6 hero-gradient overflow-hidden">
-        <!-- Floating Orbs -->
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-[100px] animate-pulse">
-            </div>
-            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-rose-500/10 rounded-full blur-[100px] animate-pulse"
-                style="animation-delay: 2s"></div>
-        </div>
+    <!-- [SECTION] Hero -->
+    <main class="relative z-10 pt-20 pb-20 px-6">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center space-y-12 animate-fadeIn">
+                <!-- Badge -->
+                <div
+                    class="floating-badge inline-flex items-center gap-4 px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-10">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-white opacity-40 animate-pulse"></div>
+                        <span class="text-xs font-bold tracking-widest uppercase text-zinc-300">Análise Comparativa
+                            2026</span>
+                    </div>
 
-        <!-- Particles -->
-        <div id="particles" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
-
-        <div class="relative z-10 max-w-7xl mx-auto w-full text-center">
-            <!-- Badge -->
-            <div
-                class="floating-badge inline-flex items-center gap-4 px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-10">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></div>
-                    <span class="text-xs font-bold tracking-widest uppercase text-slate-300">Análise Comparativa
-                        2026</span>
+                    <div class="flex items-center gap-3 border-l border-white/20 pl-4">
+                        <span class="text-[9px] text-zinc-500 font-black uppercase tracking-widest">Powered by</span>
+                        <img src="assets/img/AYA.png" alt="AYA" class="logo-aya h-6">
+                    </div>
                 </div>
-                <div class="flex items-center gap-3 border-l border-white/20 pl-4">
-                    <span class="text-[9px] text-slate-500 font-black uppercase tracking-widest">Powered by</span>
-                    <img src="assets/img/AYA.png" alt="AYA" class="logo-aya">
+
+                <!-- Title -->
+                <div class="hero-title mb-10">
+                    <h1 class="text-5xl md:text-8xl font-black leading-[0.9] tracking-tight text-white mb-4 block">
+                        Batalha
+                    </h1>
+                    <span class="text-5xl md:text-8xl font-black leading-[0.9] tracking-tight block text-gradient">
+                        Deep Research
+                    </span>
                 </div>
+
+                <!-- Description -->
+                <p
+                    class="hero-subtitle text-xl md:text-2xl text-slate-400 max-w-4xl mx-auto font-light leading-relaxed mb-16">
+                    6 IAs testadas em 19 critérios rigorosos. Qual ferramenta domina a pesquisa profunda? Análise
+                    técnica
+                    completa com dados reais.
+                </p>
             </div>
-
-            <!-- Title -->
-            <div class="hero-title mb-10">
-                <h1 class="text-5xl md:text-8xl font-black leading-[0.9] tracking-tight text-white mb-4">
-                    <span class="block">Batalha</span>
-                </h1>
-                <span class="text-5xl md:text-8xl font-black leading-[0.9] tracking-tight block gradient-text">
-                    Deep Research
-                </span>
-            </div>
-
-            <!-- Subtitle -->
-            <p
-                class="hero-subtitle text-xl md:text-2xl text-slate-400 max-w-4xl mx-auto font-light leading-relaxed mb-16 opacity-0">
-                6 IAs testadas em 19 critérios rigorosos. Qual ferramenta domina a pesquisa profunda? Análise técnica
-                completa com dados reais.
-            </p>
         </div>
-
-        <!-- Scroll Indicator -->
-        <div
-            class="scroll-indicator absolute bottom-10 w-full flex flex-col items-center justify-center gap-2 text-slate-500 z-20">
-            <span class="text-[10px] uppercase tracking-[0.3em] font-bold">Scroll para explorar</span>
-            <svg class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-        </div>
-    </section>
+    </main>
 
     <!-- Mini Summary Navigation -->
     <div class="max-w-5xl mx-auto -mt-10 px-6 relative z-30 mb-24">
         <div
-            class="glass-card p-2 rounded-2xl border border-white/10 flex flex-wrap md:flex-nowrap justify-between gap-2 shadow-2xl backdrop-blur-xl">
+            class="glass p-2 rounded-2xl border border-white/10 flex flex-wrap md:flex-nowrap justify-between gap-2 shadow-2xl backdrop-blur-xl">
             <a href="#podio"
                 class="group flex-1 flex items-center gap-3 px-6 py-4 rounded-xl hover:bg-white/5 transition-all">
                 <span
@@ -523,20 +401,20 @@
     <section class="py-20 px-6">
         <div class="max-w-6xl mx-auto">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 reveal-scale">
-                <div class="glass-card p-6 rounded-2xl text-center">
-                    <div class="text-5xl font-black gradient-text mb-2">6</div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <div class="text-5xl font-black text-gradient mb-2">6</div>
                     <div class="text-sm text-slate-400 uppercase tracking-widest">IAs Testadas</div>
                 </div>
-                <div class="glass-card p-6 rounded-2xl text-center">
-                    <div class="text-5xl font-black gradient-text mb-2">190</div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <div class="text-5xl font-black text-gradient mb-2">190</div>
                     <div class="text-sm text-slate-400 uppercase tracking-widest">Pontos Máx</div>
                 </div>
-                <div class="glass-card p-6 rounded-2xl text-center">
-                    <div class="text-5xl font-black gradient-text mb-2">19</div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <div class="text-5xl font-black text-gradient mb-2">19</div>
                     <div class="text-sm text-slate-400 uppercase tracking-widest">Critérios</div>
                 </div>
-                <div class="glass-card p-6 rounded-2xl text-center">
-                    <div class="text-5xl font-black gradient-text mb-2">7</div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <div class="text-5xl font-black text-gradient mb-2">7</div>
                     <div class="text-sm text-slate-400 uppercase tracking-widest">Categorias</div>
                 </div>
             </div>
@@ -547,7 +425,7 @@
     <section id="podio" class="py-32 px-6">
         <div class="max-w-6xl mx-auto">
             <h2 class="text-4xl md:text-6xl font-black text-center mb-4 reveal-section">
-                <span class="gradient-text">Pódio</span> <span class="text-white">Final</span>
+                <span class="text-gradient">Pódio</span> <span class="text-white">Final</span>
             </h2>
             <p class="text-center text-slate-400 text-lg mb-16 reveal-section">Os três primeiros colocados na batalha
             </p>
@@ -560,7 +438,7 @@
     <section id="ranking" class="py-32 px-6 bg-gradient-to-b from-transparent via-slate-950/30 to-transparent">
         <div class="max-w-5xl mx-auto">
             <h2 class="text-4xl md:text-6xl font-black text-center mb-4 reveal-section">
-                <span class="text-white">Ranking</span> <span class="gradient-text">Completo</span>
+                <span class="text-white">Ranking</span> <span class="text-gradient">Completo</span>
             </h2>
             <p class="text-center text-slate-400 text-lg mb-16 reveal-section">Clique em cada card para ver detalhes</p>
 
@@ -572,14 +450,14 @@
     <section id="graficos" class="py-32 px-6">
         <div class="max-w-6xl mx-auto">
             <h2 class="text-4xl md:text-6xl font-black text-center mb-4 reveal-section">
-                <span class="gradient-text">Análise</span> <span class="text-white">Visual</span>
+                <span class="text-gradient">Análise</span> <span class="text-white">Visual</span>
             </h2>
             <p class="text-center text-slate-400 text-lg mb-16 reveal-section">Dados comparativos em gráficos
                 interativos</p>
 
             <div class="grid md:grid-cols-2 gap-8">
                 <!-- Chart 1: Total Score -->
-                <div class="glass-card p-6 rounded-2xl reveal-left">
+                <div class="glass p-6 rounded-2xl reveal-left">
                     <h3 class="text-xl font-bold text-white mb-4">Pontuação Total</h3>
                     <div style="height: 300px;">
                         <canvas id="chart-total"></canvas>
@@ -587,7 +465,7 @@
                 </div>
 
                 <!-- Chart 2: Radar -->
-                <div class="glass-card p-6 rounded-2xl reveal-right">
+                <div class="glass p-6 rounded-2xl reveal-right">
                     <h3 class="text-xl font-bold text-white mb-4">Categorias (Top 3)</h3>
                     <div style="height: 300px;">
                         <canvas id="chart-radar"></canvas>
@@ -595,7 +473,7 @@
                 </div>
 
                 <!-- Chart 3: Volume -->
-                <div class="glass-card p-6 rounded-2xl md:col-span-2 reveal-scale">
+                <div class="glass p-6 rounded-2xl md:col-span-2 reveal-scale">
                     <h3 class="text-xl font-bold text-white mb-4">Volume: Palavras vs Citações</h3>
                     <div style="height: 300px;">
                         <canvas id="chart-volume"></canvas>
@@ -609,12 +487,12 @@
     <section id="tabela" class="py-32 px-6 bg-gradient-to-b from-transparent via-slate-950/30 to-transparent">
         <div class="max-w-7xl mx-auto">
             <h2 class="text-4xl md:text-6xl font-black text-center mb-4 reveal-section">
-                <span class="text-white">Pontuação</span> <span class="gradient-text">Detalhada</span>
+                <span class="text-white">Pontuação</span> <span class="text-gradient">Detalhada</span>
             </h2>
             <p class="text-center text-slate-400 text-lg mb-16 reveal-section">18 critérios avaliados para cada
                 ferramenta</p>
 
-            <div class="glass-card p-1 rounded-3xl overflow-hidden reveal-scale">
+            <div class="glass p-1 rounded-3xl overflow-hidden reveal-scale">
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm comparison-table">
                         <thead>
@@ -635,7 +513,7 @@
     <section id="insights" class="py-32 px-6">
         <div class="max-w-5xl mx-auto">
             <h2 class="text-4xl md:text-6xl font-black text-center mb-4 reveal-section">
-                <span class="gradient-text">Insights</span> <span class="text-white">Críticos</span>
+                <span class="text-gradient">Insights</span> <span class="text-white">Críticos</span>
             </h2>
             <p class="text-center text-slate-400 text-lg mb-16 reveal-section">Análise profunda de cada ferramenta</p>
 
@@ -647,7 +525,7 @@
     <section id="veredicto" class="py-32 px-6 relative overflow-hidden">
         <div class="max-w-5xl mx-auto">
             <div class="relative rounded-[3rem] p-16 overflow-hidden reveal-scale">
-                <div class="absolute inset-0 bg-gradient-to-br from-orange-600 via-rose-600 to-purple-600"></div>
+                <div class="absolute inset-0 bg-gradient-to-br from-zinc-800 via-zinc-900 to-black"></div>
 
                 <div class="relative z-10">
                     <h2 class="text-5xl md:text-6xl font-black mb-10 text-white">🏁 Veredito Final</h2>
@@ -663,45 +541,74 @@
                     </div>
                 </div>
             </div>
-        </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="py-20 px-6 border-t border-white/10">
-        <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 text-slate-500">
-            <div class="reveal-section">
-                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Metodologia</h4>
-                <p class="text-xs leading-relaxed">
-                    Teste realizado solicitando a todas as IAs um Deep Research sobre o livro "Por que Nós Dormimos" de
-                    Matthew Walker. Avaliação em 19 critérios divididos em 7 categorias, com pontuação de 0-10 em cada
-                    critério.
-                </p>
+    <!-- [LAYOUT] Footer -->
+    <footer class="py-24 px-6 relative z-10 border-t border-white/10">
+        <div class="container mx-auto max-w-6xl">
+            <!-- Instagram Cards -->
+            <div class="grid md:grid-cols-2 gap-8 mb-16 reveal-section">
+                <a href="https://instagram.com/ayatech_br" target="_blank" rel="noopener noreferrer"
+                    class="glass p-6 rounded-2xl flex items-center gap-6 group hover:bg-white/5 transition-all">
+                    <div
+                        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                        <i data-lucide="instagram" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-zinc-500 uppercase tracking-widest mb-1">Siga no Instagram</p>
+                        <p class="text-xl font-bold text-white group-hover:text-zinc-300 transition-colors">
+                            @ayatech_br</p>
+                    </div>
+                </a>
+                <a href="https://instagram.com/brenolvrabelo" target="_blank" rel="noopener noreferrer"
+                    class="glass p-6 rounded-2xl flex items-center gap-6 group hover:bg-white/5 transition-all">
+                    <div
+                        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                        <i data-lucide="instagram" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-zinc-500 uppercase tracking-widest mb-1">Autor</p>
+                        <p class="text-xl font-bold text-white group-hover:text-zinc-300 transition-colors">
+                            @brenolvrabelo</p>
+                    </div>
+                </a>
             </div>
-            <div class="reveal-section" style="transition-delay: 0.1s;">
-                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Fontes</h4>
-                <p class="text-xs leading-relaxed italic">
-                    Análise baseada em outputs reais gerados entre Dezembro 2024 e Janeiro 2026. Dados de volume
-                    (palavras, páginas, citações) extraídos diretamente dos PDFs.
-                </p>
+
+            <!-- Methodology and Sources -->
+            <div class="grid md:grid-cols-2 gap-12 text-zinc-500 reveal-section">
+                <div>
+                    <h4 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-4">Metodologia</h4>
+                    <p class="text-xs leading-relaxed">
+                        Teste realizado solicitando a todas as IAs um Deep Research sobre o livro "Por que Nós Dormimos"
+                        de
+                        Matthew Walker. Avaliação em 19 critérios divididos em 7 categorias, com pontuação de 0-10 em
+                        cada
+                        critério.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-4">Fontes</h4>
+                    <p class="text-xs leading-relaxed italic">
+                        Análise baseada em outputs reais gerados entre Dezembro 2024 e Janeiro 2026. Dados de volume
+                        (palavras, páginas, citações) extraídos diretamente dos PDFs.
+                    </p>
+                </div>
             </div>
         </div>
     </footer>
 
-    <!-- Fixed Bar -->
-    <div
-        class="fixed bottom-0 left-0 w-full bg-black/80 backdrop-blur-md py-4 text-[9px] text-slate-500 font-bold uppercase tracking-[0.5em] text-center z-50 border-t border-white/5">
-        Este documento é uma análise técnica independente • Powered by AYA
-    </div>
-
     <!-- Logo Final -->
-    <div class="pb-32 pt-12 flex flex-col justify-center items-center gap-4">
-        <img src="assets/img/AYA.png" alt="AYA Logo" class="h-20 opacity-80" style="filter: brightness(0) invert(1);">
-        <p class="text-sm font-bold uppercase tracking-[0.4em] text-slate-500">The future is intelligence</p>
+    <div class="pb-32 pt-12 flex flex-col justify-center items-center gap-4 relative z-10">
+        <img src="assets/img/AYA.png" alt="AYA Logo" class="h-20 opacity-80 logo-aya">
+        <p class="text-sm font-bold uppercase tracking-[0.4em] text-zinc-500">The future is intelligence</p>
     </div>
 
     <!-- Scripts -->
     <script src="battle-script.js"></script>
     <script>
+        // 0. Initialize Lucide Icons
+        lucide.createIcons();
+
         // 1. Initialize Smooth Scroll
         const lenis = new Lenis({ duration: 1.2, smoothWheel: true });
         function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
@@ -714,11 +621,17 @@
         // 2. Register GSAP Plugins
         gsap.registerPlugin(ScrollTrigger);
 
-        // 3. Progress Bar
-        gsap.to('.progress-bar', {
-            scaleX: 1, ease: 'none',
-            scrollTrigger: { trigger: 'body', start: 'top top', end: 'bottom bottom', scrub: 0.3 }
-        });
+        // 3. Floating Back Button
+        const floatingBack = document.getElementById('floatingBack');
+        if (floatingBack) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 500) {
+                    floatingBack.classList.add('visible');
+                } else {
+                    floatingBack.classList.remove('visible');
+                }
+            });
+        }
 
         // 4. Reveal Animations
         gsap.utils.toArray('.reveal-section').forEach((el) => {
@@ -740,59 +653,12 @@
             gsap.to(el, { opacity: 1, scale: 1, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 85%' } });
         });
 
-        // 5. Hero Animation
-        const heroTl = gsap.timeline();
-        heroTl.from('.floating-badge', { y: 50, opacity: 0, duration: 1 })
-            .from('.hero-title span', { y: 100, opacity: 0, stagger: 0.2, duration: 1.2, ease: 'power4.out' }, '-=0.5')
-            .to('.hero-subtitle', { opacity: 1, y: 0, duration: 1 }, '-=0.5');
-
-        // 6. Particles
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 30; i++) {
-                const particle = document.createElement('div');
-                particle.style.cssText = `position:absolute;left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:4px;height:4px;background:rgba(244,114,182,0.4);border-radius:50%;`;
-                container.appendChild(particle);
-                gsap.to(particle, {
-                    y: -window.innerHeight, x: (Math.random() - 0.5) * 200, opacity: 0,
-                    duration: 10 + Math.random() * 10, repeat: -1, ease: 'none', delay: Math.random() * 10
-                });
-            }
-        }
-        createParticles();
-
-        // 7. Custom Cursor
-        const cursor = document.querySelector('.custom-cursor');
-        let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
-        document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
-        function animateCursor() {
-            cursorX += (mouseX - cursorX) * 0.1; cursorY += (mouseY - cursorY) * 0.1;
-            cursor.style.left = (cursorX - 10) + 'px'; cursor.style.top = (cursorY - 10) + 'px';
-            requestAnimationFrame(animateCursor);
-        }
-        animateCursor();
-
-        document.querySelectorAll('a, button, .glass-card, tr, .ranking-card').forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-        });
-
-        if ('ontouchstart' in window) cursor.style.display = 'none';
-
-        // 8. Render Podium
-        renderPodium();
-
-        // 9. Render Ranking
-        renderRankingList();
-
-        // 10. Render Charts
-        renderAllCharts();
-
-        // 11. Render Table
-        renderDetailedTable();
-
-        // 12. Render Insights
-        renderInsightsSection();
+        // 6. External Render Functions (from battle-script.js)
+        if (typeof renderPodium === 'function') renderPodium();
+        if (typeof renderRankingList === 'function') renderRankingList();
+        if (typeof renderAllCharts === 'function') renderAllCharts();
+        if (typeof renderDetailedTable === 'function') renderDetailedTable();
+        if (typeof renderInsightsSection === 'function') renderInsightsSection();
 
         // Manually trigger GSAP reveal animations for dynamically created insight cards
         setTimeout(() => {
@@ -809,7 +675,6 @@
             });
         }, 100);
     </script>
-
 </body>
 
 </html>

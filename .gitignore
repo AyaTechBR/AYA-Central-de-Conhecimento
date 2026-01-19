@@ -4,3 +4,18 @@ dist
 dist-ssr
 *.local
 .npm
+
+# Internal documentation and templates (not for public access)
+DOCS_TEMPLATE_MASTER.md
+DOCS_ICONS.md
+DOCS_RESPONSIVENESS.md
+DOCS_IMAGE_LAYOUTS.md
+AI_AUTOMATION_STRATEGY.md
+_template_artigo.html
+template-novo.html
+Docs processos/
+
+# Reference/Dev files
+*.tsx
+battle-script.js
+battle-styles.css

@@ -13,6 +13,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#000000',
+                        foreground: '#ffffff',
+                        card: 'rgba(255, 255, 255, 0.03)',
+                        border: 'rgba(255, 255, 255, 0.1)',
+                        muted: {
+                            foreground: '#a1a1aa'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
         * {
@@ -32,99 +51,85 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #030712;
-            /* Animated Mesh Gradient Background */
-            background-image:
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
-                radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
-            background-size: 200% 200%;
-            animation: meshFlow 6s ease-in-out infinite alternate;
-            color: #f8fafc;
+            background-color: #000000;
+            color: #ffffff;
             overflow-x: hidden;
-            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
-        @keyframes meshFlow {
-            0% {
-                background-position: 0% 0%;
-            }
-
-            25% {
-                background-position: 100% 0%;
-            }
-
-            50% {
-                background-position: 100% 100%;
-            }
-
-            75% {
-                background-position: 0% 100%;
-            }
-
-            100% {
-                background-position: 0% 0%;
-            }
-        }
-
-        /* Progress bar */
-        .progress-bar {
+        /* Background Reveal Setup */
+        #canvas-reveal-effect {
             position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
-            z-index: 9999;
-            transform-origin: left;
-            transform: scaleX(0);
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        /* Glass morphism cards */
-        .glass-card {
+        /* Glass morphism */
+        .glass {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .glass-card:hover {
+        .glass:hover {
             background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(99, 102, 241, 0.3);
-            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.15);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+            transform: translateY(-4px);
         }
 
-        /* Aurora blob that follows mouse */
-        .aurora-blob {
-            position: fixed;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle,
-                    rgba(99, 102, 241, 0.15) 0%,
-                    rgba(139, 92, 246, 0.1) 30%,
-                    rgba(236, 72, 153, 0.05) 60%,
-                    transparent 70%);
+        .glass h3 {
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Text gradient */
+        .text-gradient {
+            background: linear-gradient(to right, #ffffff, #a1a1aa, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* White orbs */
+        .orb {
+            position: absolute;
             border-radius: 50%;
+            filter: blur(100px);
+            z-index: 0;
             pointer-events: none;
-            z-index: 1;
-            transform: translate(-50%, -50%);
-            transition: opacity 0.3s ease;
-            filter: blur(40px);
         }
 
-        /* Magnetic 3D card effect */
+        /* Logo */
+        .logo-aya {
+            filter: brightness(0) invert(1);
+            height: 32px;
+            width: auto;
+            object-fit: contain;
+            opacity: 1;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-aya:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-aya-hero {
+            filter: brightness(0) invert(1);
+            height: 80px;
+            width: auto;
+        }
+
+        /* Magnetic card effect */
         .magnetic-card {
             transform-style: preserve-3d;
             perspective: 1000px;
+            position: relative;
         }
 
-        .magnetic-card-inner {
-            transition: transform 0.1s ease-out;
-            transform-style: preserve-3d;
-        }
-
-        .magnetic-card .card-shine {
+        .card-shine {
             position: absolute;
             inset: 0;
             background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
@@ -140,229 +145,22 @@
             opacity: 1;
         }
 
-        /* Hero gradient */
-        .hero-gradient {
-            background:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.3), transparent),
-                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(139, 92, 246, 0.15), transparent),
-                radial-gradient(ellipse 50% 30% at 20% 80%, rgba(236, 72, 153, 0.1), transparent);
-        }
-
-        /* Animated gradient text */
-        .gradient-text {
-            background: linear-gradient(135deg, #10b981, #06b6d4, #6366f1, #8b5cf6);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientShift 3s ease infinite;
-            filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.3));
-        }
-
-        @keyframes gradientShift {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-                filter: hue-rotate(0deg);
-            }
-
-            50% {
-                background-position: 100% 50%;
-                filter: hue-rotate(30deg);
-            }
-        }
-
-        /* Enriched Glass Card */
-        .glass-card {
-            background: rgba(20, 25, 40, 0.4);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .glass-card:hover {
-            background: rgba(30, 40, 60, 0.6);
-            /* Border color cycle animation */
-            animation: borderCycle 1.5s linear infinite;
-            box-shadow: 0 20px 80px rgba(99, 102, 241, 0.25), inset 0 0 20px rgba(255, 255, 255, 0.05);
-            transform: translateY(-5px) scale(1.01);
-        }
-
-        @keyframes borderCycle {
-            0% {
-                border-color: rgba(99, 102, 241, 0.5);
-            }
-
-            33% {
-                border-color: rgba(236, 72, 153, 0.5);
-            }
-
-            66% {
-                border-color: rgba(6, 182, 212, 0.5);
-            }
-
-            100% {
-                border-color: rgba(99, 102, 241, 0.5);
-            }
-        }
-
-        /* Animated Borders for Cards */
-        .question-card::before {
-            content: '';
-            position: absolute;
-            inset: -1px;
-            border-radius: inherit;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1), rgba(5, 182, 211, 0.1));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-            opacity: 0.5;
-            transition: opacity 0.4s ease;
-        }
-
-        .question-card:hover::before {
-            opacity: 1;
-            background: linear-gradient(135deg, #6366f1, #ec4899, #06b6d4);
-        }
-
-        /* Floating particles */
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(99, 102, 241, 0.5);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        /* Section reveal */
-        .reveal-section {
-            opacity: 0;
-            transform: translateY(60px);
-        }
-
-        /* Floating badges */
-        .floating-badge {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(0deg);
-            }
-
-            25% {
-                transform: translateY(-10px) rotate(2deg);
-            }
-
-            75% {
-                transform: translateY(5px) rotate(-2deg);
-            }
-        }
-
-        /* Question card hover glow */
-        .question-card {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .question-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .question-card:hover::before {
-            opacity: 1;
-        }
-
-        .question-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .question-card:hover::after {
-            left: 100%;
-        }
-
-        /* Category badge */
-        .category-badge {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-            border: 1px solid rgba(99, 102, 241, 0.3);
-        }
-
-        /* Arrow animation */
-        .arrow-icon {
-            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .question-card:hover .arrow-icon {
-            transform: translateX(8px);
-        }
-
         /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #0f172a;
+            background: #000;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(#6366f1, #8b5cf6);
-            border-radius: 3px;
+            background: #333;
+            border-radius: 4px;
         }
 
-        .logo-aya {
-            filter: brightness(0) invert(1);
-            height: 40px;
-            width: auto;
-        }
-
-        .logo-aya-hero {
-            filter: brightness(0) invert(1);
-            height: 80px;
-            width: auto;
-        }
-
-        @media (max-width: 640px) {
-            .logo-aya-hero {
-                height: 60px;
-            }
-        }
-
-        /* Noise overlay for texture */
-        .noise-overlay::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-        }
-
-        /* Glow effect on hero */
-        .hero-glow {
-            box-shadow: 0 0 80px rgba(99, 102, 241, 0.3),
-                0 0 120px rgba(139, 92, 246, 0.2);
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
         }
 
         /* Search input */
@@ -374,152 +172,211 @@
 
         .search-input:focus {
             background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
             outline: none;
         }
 
-        /* Pulse animation for "NEW" badge */
-        @keyframes pulse-glow {
-
-            0%,
-            100% {
-                box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
-            }
-
-            50% {
-                box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
-            }
+        /* Category badge */
+        .category-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .new-badge {
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-
-        /* Word Reveal Animation */
-        .word-reveal {
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        .word-reveal-word {
-            display: inline-block;
-            transform: translateY(100%);
+        /* Reveal animation */
+        .reveal {
             opacity: 0;
-            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.6s ease;
-        }
-
-        .word-reveal-word.revealed {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .word-reveal-line {
-            display: block;
-            overflow: hidden;
-        }
-
-        /* Hero fade animation */
-        .hero-fade {
             transform: translateY(30px);
-            transition: opacity 0.8s cubic-bezier(0.23, 1, 0.32, 1),
-                transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .hero-fade.visible {
-            opacity: 1 !important;
+        .reveal.visible {
+            opacity: 1;
             transform: translateY(0);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ============================================================
+           RESPONSIVE DESIGN - MOBILE OPTIMIZATIONS
+           ============================================================ */
+
+        /* Mobile: max-width 640px (Small phones) */
+        @media (max-width: 640px) {
+
+            /* Fix text overflow - ensure proper spacing */
+            h1,
+            .text-gradient {
+                padding: 0 1rem;
+                text-align: center;
+            }
+
+            /* Hero title - reduce size */
+            h1 {
+                font-size: 2.5rem !important;
+                /* 40px */
+                line-height: 1.2 !important;
+                text-align: center;
+            }
+
+            /* Hero subtitle */
+            p.text-2xl {
+                font-size: 1rem !important;
+                /* 16px */
+                padding: 0 1rem;
+            }
+
+            /* Glass cards - reduce padding */
+            .glass {
+                padding: 1.25rem !important;
+            }
+
+            /* Logo hero - reduce size */
+            .logo-aya-hero {
+                height: 50px !important;
+            }
+
+            /* Orbs - reduce size */
+            .orb {
+                width: 250px !important;
+                height: 250px !important;
+            }
+        }
+
+        /* Tablet and Mobile: max-width 768px */
+        @media (max-width: 768px) {
+
+            /* Hero title adjustments */
+            h1 {
+                font-size: 3rem !important;
+                /* 48px */
+                line-height: 1.2 !important;
+                padding: 0 1rem;
+            }
+
+            /* Section titles */
+            h2 {
+                font-size: 2rem !important;
+                /* 32px */
+            }
+
+            /* Hero subtitle */
+            p.text-2xl,
+            p.text-3xl {
+                font-size: 1.25rem !important;
+                /* 20px */
+                padding: 0 1rem;
+            }
+
+            /* Glass cards padding reduction */
+            .glass {
+                padding: 1.5rem !important;
+            }
+
+            /* Logo hero */
+            .logo-aya-hero {
+                height: 60px !important;
+            }
+
+            /* Orbs - reduce size */
+            .orb {
+                width: 300px !important;
+                height: 300px !important;
+            }
+
+            /* Article cards - stack vertically */
+            .magnetic-card {
+                flex-direction: column !important;
+            }
+
+            .magnetic-card .md\:w-96 {
+                width: 100% !important;
+            }
         }
     </style>
 </head>
 
-<body class="antialiased">
-    <!-- Progress Bar -->
-    <div class="progress-bar"></div>
+<body class="selection:bg-white/20">
 
-    <!-- Aurora Blob (follows mouse) -->
-    <div class="aurora-blob" id="auroraBlob"></div>
+    <!-- Canvas Reveal Background -->
+    <canvas id="canvas-reveal-effect"></canvas>
 
-    <!-- Hero Section -->
-    <header class="hero-gradient min-h-[70vh] flex items-center justify-center relative overflow-hidden noise-overlay">
-        <!-- Animated background orbs -->
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-[150px] animate-pulse"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/15 rounded-full blur-[120px] animate-pulse"
-            style="animation-delay: 1s;"></div>
-        <div class="absolute top-1/2 right-1/3 w-64 h-64 bg-pink-500/10 rounded-full blur-[100px] animate-pulse"
+    <!-- Background Orbs -->
+    <div class="fixed inset-0 overflow-hidden z-0">
+        <div class="orb w-[500px] h-[500px] bg-white/10 top-[-10%] left-[-10%] animate-pulse"></div>
+        <div class="orb w-[600px] h-[600px] bg-white/5 bottom-[-20%] right-[-10%] animate-pulse"
             style="animation-delay: 2s;"></div>
+        <div class="orb w-[400px] h-[400px] bg-zinc-800/10 top-[40%] left-[60%] animate-pulse"
+            style="animation-delay: 4s;"></div>
+    </div>
 
-        <!-- Floating particles container -->
-        <div id="particles" class="absolute inset-0 overflow-hidden pointer-events-none mix-blend-screen"></div>
+    <!-- Main Content -->
+    <main class="relative z-10 pt-20 pb-20 px-6">
+        <div class="container mx-auto max-w-6xl">
 
-        <div class="max-w-5xl mx-auto px-6 relative z-10 text-center">
-            <!-- Logo -->
-            <div class="floating-badge mb-8">
-                <img src="assets/img/AYA.png" alt="AYA" class="logo-aya-hero mx-auto hero-glow rounded-2xl p-4">
-            </div>
-
-            <!-- Main Title with Word Reveal -->
-            <h1 class="hero-title text-4xl md:text-7xl font-black mb-6 leading-tight tracking-tight" id="heroTitle">
-                <span class="word-reveal-line">
-                    <span class="word-reveal"><span class="word-reveal-word text-white">Central</span></span>
-                    <span class="word-reveal"><span class="word-reveal-word text-white">de</span></span>
-                </span>
-                <span class="word-reveal-line">
-                    <span class="word-reveal"><span class="word-reveal-word gradient-text">Conhecimento</span></span>
-                </span>
-            </h1>
-
-            <!-- Subtitle -->
-            <p class="hero-subtitle text-lg md:text-xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed mb-10 hero-fade"
-                style="opacity: 0;">
-                Descubra respostas detalhadas para as dúvidas mais frequentes sobre
-                <strong class="text-white">Inteligência Artificial</strong>, tecnologia e produtividade.
-            </p>
-
-            <!-- Search Box -->
-            <div class="max-w-xl mx-auto relative hero-fade" style="opacity: 0;">
-                <input type="text" id="searchInput" placeholder="Buscar dúvidas..."
-                    class="search-input w-full px-6 py-4 rounded-2xl text-white placeholder-slate-500 text-lg">
-                <svg class="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none"
-                    stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
-
-            <!-- Stats -->
-            <div class="flex items-center justify-center gap-8 mt-12 text-sm hero-fade" style="opacity: 0;">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
-                    <span class="text-slate-400"><span class="font-bold text-white" id="questionCount">5</span>
-                        Artigos</span>
+            <!-- Hero Section -->
+            <div class="text-center space-y-12 mb-20 reveal">
+                <!-- Logo -->
+                <div class="mb-8">
+                    <img src="assets/img/AYA.png" alt="AYA" class="logo-aya-hero mx-auto">
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 bg-indigo-400 rounded-full"></span>
-                    <span class="text-slate-400">Atualizado <span class="font-bold text-white"
-                            id="currentDateHeader">Jan 2026</span></span>
+
+                <!-- Title -->
+                <div class="space-y-6">
+                    <h1 class="text-6xl md:text-8xl font-black tracking-tighter leading-none text-white"
+                        style="text-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 80px rgba(0,0,0,0.5);">
+                        Central de<br />
+                        <span class="text-gradient">Conhecimento</span>
+                    </h1>
+                    <p class="text-2xl md:text-3xl text-zinc-400 max-w-4xl mx-auto leading-relaxed font-light tracking-tight"
+                        style="text-shadow: 0 0 30px rgba(0,0,0,0.9);">
+                        Descubra respostas detalhadas para as dúvidas mais frequentes sobre
+                        <strong class="text-white font-bold">Inteligência Artificial</strong>, tecnologia e
+                        produtividade.
+                    </p>
+                </div>
+
+                <!-- Search Box -->
+                <div class="max-w-xl mx-auto relative">
+                    <input type="text" id="searchInput" placeholder="Buscar dúvidas..."
+                        class="search-input w-full px-6 py-4 rounded-2xl text-white placeholder-zinc-600 text-lg">
+                    <svg class="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-600" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+
+                <!-- Stats -->
+                <div class="flex items-center justify-center gap-8 text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-white rounded-full opacity-40 animate-pulse"></span>
+                        <span class="text-zinc-500" style="text-shadow: 0 0 20px rgba(0,0,0,0.9);"><span
+                                class="font-bold text-white" id="questionCount">6</span>
+                            Artigos</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-white rounded-full opacity-40"></span>
+                        <span class="text-zinc-500" style="text-shadow: 0 0 20px rgba(0,0,0,0.9);">Atualizado <span
+                                class="font-bold text-white">Jan 2026</span></span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </header>
 
-    <!-- Questions Section -->
-    <section class="py-20 px-6 relative">
-        <div class="max-w-5xl mx-auto">
             <!-- Section Header -->
-            <div class="reveal-section mb-12 text-center">
-                <h2 class="text-3xl md:text-4xl font-black text-white mb-3">Explore Nossas <span
-                        class="gradient-text">Análises</span></h2>
-                <p class="text-slate-400 text-lg max-w-xl mx-auto">Conteúdos aprofundados para você tomar melhores
+            <div class="mb-12 text-center reveal">
+                <h2 class="text-3xl md:text-4xl font-black text-white mb-3"
+                    style="text-shadow: 0 0 30px rgba(0,0,0,0.9);">Explore Nossas <span
+                        class="text-gradient">Análises</span></h2>
+                <p class="text-zinc-500 text-lg max-w-xl mx-auto" style="text-shadow: 0 0 20px rgba(0,0,0,0.9);">
+                    Conteúdos aprofundados para você tomar melhores
                     decisões sobre tecnologia e IA</p>
             </div>
 
-            <!-- Questions Grid -->
+            <!-- Articles Grid -->
             <div class="grid gap-6" id="questionsGrid">
 
-                <!-- Question Card 1 -->
+                <!-- Article Card 1 -->
                 <a href="combos-ias-vale-a-pena.html"
-                    class="question-card glass-card magnetic-card rounded-2xl overflow-hidden group flex flex-col md:flex-row">
+                    class="magnetic-card glass rounded-2xl overflow-hidden group flex flex-col md:flex-row reveal">
                     <div class="card-shine"></div>
 
                     <!-- Image Side -->
@@ -532,24 +389,24 @@
                     <div class="p-5 md:p-6 flex flex-col justify-center flex-grow">
                         <div class="flex items-center gap-2 mb-2">
                             <span
-                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-indigo-300">
+                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-white">
                                 Análises & Comparativos
                             </span>
                             <span
-                                class="new-badge bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-rose-500/30">
+                                class="bg-white/10 text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-white/20">
                                 Hot
                             </span>
                         </div>
                         <h3
-                            class="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-indigo-300 transition-colors">
+                            class="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-zinc-300 transition-colors">
                             Combos de IAs vale a pena?
                         </h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-3 line-clamp-2">
+                        <p class="text-zinc-500 text-sm leading-relaxed mb-3 line-clamp-2">
                             Análise técnica comparando agregadores como Adapta One e Inner AI versus assinaturas diretas
                             do ChatGPT Plus e Claude Pro.
                         </p>
                         <div
-                            class="flex items-center gap-2 text-indigo-400 text-xs font-semibold group-hover:gap-3 transition-all">
+                            class="flex items-center gap-2 text-white text-xs font-semibold group-hover:gap-3 transition-all">
                             <span>Ler análise</span>
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -559,40 +416,37 @@
                     </div>
                 </a>
 
-                <!-- Question Card 2: Multimodalidade -->
+                <!-- Article Card 2 -->
                 <a href="multimodalidade-chatgpt.html"
-                    class="question-card glass-card magnetic-card rounded-2xl overflow-hidden group flex flex-col md:flex-row">
+                    class="magnetic-card glass rounded-2xl overflow-hidden group flex flex-col md:flex-row reveal">
                     <div class="card-shine"></div>
 
-                    <!-- Image Side -->
                     <div class="md:w-96 flex-shrink-0 relative" style="aspect-ratio: 16/7;">
                         <img src="assets/img/multimodalidade-capa.jpg" alt="Multimodalidade Cover"
                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                     </div>
 
-                    <!-- Content Side -->
                     <div class="p-5 md:p-6 flex flex-col justify-center flex-grow">
                         <div class="flex items-center gap-2 mb-2">
                             <span
-                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-indigo-300">
+                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-white">
                                 Tecnologia & IA
                             </span>
                             <span
-                                class="new-badge bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-emerald-500/30">
+                                class="bg-white/10 text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-white/20">
                                 Novo
                             </span>
                         </div>
                         <h3
-                            class="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-indigo-300 transition-colors">
+                            class="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-zinc-300 transition-colors">
                             ChatGPT: Multimodalidade & Modo Agent
                         </h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-3 line-clamp-2">
+                        <p class="text-zinc-500 text-sm leading-relaxed mb-3 line-clamp-2">
                             Entenda os limites do ChatGPT, como ele processa arquivos, gera planilhas, executa tarefas
-                            de forma
-                            autônoma e a multimodalidade dos modelos.
+                            de forma autônoma e a multimodalidade dos modelos.
                         </p>
                         <div
-                            class="flex items-center gap-2 text-indigo-400 text-xs font-semibold group-hover:gap-3 transition-all">
+                            class="flex items-center gap-2 text-white text-xs font-semibold group-hover:gap-3 transition-all">
                             <span>Ler análise</span>
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -602,39 +456,37 @@
                     </div>
                 </a>
 
-                <!-- Question Card 3: Claude 4.5 -->
+                <!-- Article Card 3 -->
                 <a href="claude-modelos-4-5.html"
-                    class="question-card glass-card magnetic-card rounded-2xl overflow-hidden group flex flex-col md:flex-row">
+                    class="magnetic-card glass rounded-2xl overflow-hidden group flex flex-col md:flex-row reveal">
                     <div class="card-shine"></div>
 
-                    <!-- Image Side (Gradient) -->
                     <div class="md:w-96 flex-shrink-0 relative" style="aspect-ratio: 16/7;">
                         <img src="assets/img/claude-family-cover.jpg" alt="Família Claude 4.5"
                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                     </div>
 
-                    <!-- Content Side -->
                     <div class="p-5 md:p-6 flex flex-col justify-center flex-grow">
                         <div class="flex items-center gap-2 mb-2">
                             <span
-                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-indigo-300">
+                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-white">
                                 Análises & Comparativos
                             </span>
                             <span
-                                class="new-badge bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-rose-500/30">
+                                class="bg-white/10 text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-white/20">
                                 Hot
                             </span>
                         </div>
 
-                        <h3 class="text-xl font-bold my-2 text-white group-hover:text-rose-300 transition-colors">
+                        <h3 class="text-xl font-bold my-2 text-white group-hover:text-zinc-300 transition-colors">
                             Claude 4.5: Haiku vs Sonnet vs Opus
                         </h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-3 line-clamp-2">
+                        <p class="text-zinc-500 text-sm leading-relaxed mb-3 line-clamp-2">
                             Guia definitivo sobre a família Claude 4.5: qual modelo escolher para coding, velocidade ou
                             raciocínio complexo.
                         </p>
                         <div
-                            class="flex items-center gap-2 text-rose-400 text-xs font-semibold group-hover:gap-3 transition-all">
+                            class="flex items-center gap-2 text-white text-xs font-semibold group-hover:gap-3 transition-all">
                             <span>Ver comparativo</span>
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -644,39 +496,37 @@
                     </div>
                 </a>
 
-                <!-- Question Card 4: Data Export -->
+                <!-- Article Card 4 -->
                 <a href="exportacao-dados-ia.html"
-                    class="question-card glass-card magnetic-card rounded-2xl overflow-hidden group flex flex-col md:flex-row">
+                    class="magnetic-card glass rounded-2xl overflow-hidden group flex flex-col md:flex-row reveal">
                     <div class="card-shine"></div>
 
-                    <!-- Image Side -->
                     <div class="md:w-96 flex-shrink-0 relative" style="aspect-ratio: 16/7;">
                         <img src="assets/img/exportacao-cover.png" alt="Exportação de Dados Cover"
                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                     </div>
 
-                    <!-- Content Side -->
                     <div class="p-5 md:p-6 flex flex-col justify-center flex-grow">
                         <div class="flex items-center gap-2 mb-2">
                             <span
-                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-emerald-300">
+                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-white">
                                 Guias Práticos
                             </span>
                             <span
-                                class="new-badge bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-amber-500/30">
+                                class="bg-white/10 text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-white/20">
                                 Essencial
                             </span>
                         </div>
 
-                        <h3 class="text-xl font-bold my-2 text-white group-hover:text-emerald-300 transition-colors">
+                        <h3 class="text-xl font-bold my-2 text-white group-hover:text-zinc-300 transition-colors">
                             Como exportar seus dados (ChatGPT, Claude, Gemini)
                         </h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-3 line-clamp-2">
+                        <p class="text-zinc-500 text-sm leading-relaxed mb-3 line-clamp-2">
                             Comparativo completo: quais IAs permitem baixar 100% do histórico e quais tentam prender
                             seus dados.
                         </p>
                         <div
-                            class="flex items-center gap-2 text-emerald-400 text-xs font-semibold group-hover:gap-3 transition-all">
+                            class="flex items-center gap-2 text-white text-xs font-semibold group-hover:gap-3 transition-all">
                             <span>Ler guia</span>
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -686,39 +536,37 @@
                     </div>
                 </a>
 
-                <!-- Question Card 5: NotebookLM Plans -->
+                <!-- Article Card 5 -->
                 <a href="notebooklm-planos-recursos.html"
-                    class="question-card glass-card magnetic-card rounded-2xl overflow-hidden group flex flex-col md:flex-row">
+                    class="magnetic-card glass rounded-2xl overflow-hidden group flex flex-col md:flex-row reveal">
                     <div class="card-shine"></div>
 
-                    <!-- Image Side -->
                     <div class="md:w-96 flex-shrink-0 relative" style="aspect-ratio: 16/7;">
                         <img src="assets/img/notebooklm-cover.png" alt="NotebookLM Cover"
                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                     </div>
 
-                    <!-- Content Side -->
                     <div class="p-5 md:p-6 flex flex-col justify-center flex-grow">
                         <div class="flex items-center gap-2 mb-2">
                             <span
-                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-emerald-300">
+                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-white">
                                 Guias Práticos
                             </span>
                             <span
-                                class="new-badge bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-emerald-500/30">
+                                class="bg-white/10 text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-white/20">
                                 Novo
                             </span>
                         </div>
 
-                        <h3 class="text-xl font-bold my-2 text-white group-hover:text-cyan-300 transition-colors">
+                        <h3 class="text-xl font-bold my-2 text-white group-hover:text-zinc-300 transition-colors">
                             Google NotebookLM: Guia Completo de Planos
                         </h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-3 line-clamp-2">
+                        <p class="text-zinc-500 text-sm leading-relaxed mb-3 line-clamp-2">
                             Do Free ao Ultra: comparativo oficial, limites detalhados e novidades 2025/2026 (Deep
                             Research, Video Overviews, Learning Guide).
                         </p>
                         <div
-                            class="flex items-center gap-2 text-cyan-400 text-xs font-semibold group-hover:gap-3 transition-all">
+                            class="flex items-center gap-2 text-white text-xs font-semibold group-hover:gap-3 transition-all">
                             <span>Ver guia completo</span>
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -728,40 +576,40 @@
                     </div>
                 </a>
 
-                <!-- Question Card 6: Deep Research Battle -->
+
+
+                <!-- Article Card 7 -->
                 <a href="battle-dashboard.html"
-                    class="question-card glass-card magnetic-card rounded-2xl overflow-hidden group flex flex-col md:flex-row">
+                    class="magnetic-card glass rounded-2xl overflow-hidden group flex flex-col md:flex-row reveal">
                     <div class="card-shine"></div>
 
-                    <!-- Image Side -->
                     <div class="md:w-96 flex-shrink-0 relative" style="aspect-ratio: 16/7;">
                         <img src="assets/img/battle-dashboard-cover.png" alt="Deep Research Battle Cover"
                             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500">
                     </div>
 
-                    <!-- Content Side -->
                     <div class="p-5 md:p-6 flex flex-col justify-center flex-grow">
                         <div class="flex items-center gap-2 mb-2">
                             <span
-                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-indigo-300">
+                                class="category-badge px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider text-white">
                                 Análises & Comparativos
                             </span>
                             <span
-                                class="new-badge bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-rose-500/30">
+                                class="bg-white/10 text-white px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border border-white/20">
                                 Hot
                             </span>
                         </div>
 
-                        <h3 class="text-xl font-bold my-2 text-white group-hover:text-blue-300 transition-colors">
+                        <h3 class="text-xl font-bold my-2 text-white group-hover:text-zinc-300 transition-colors">
                             Batalha Deep Research: Qual IA domina?
                         </h3>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-3 line-clamp-2">
-                            Análise técnica comparativa de 6 IAs em 19 critérios. ChatGPT, Perplexity, Gemini, Manus,
-                            Claude e Genspark - qual ferramenta vence na pesquisa profunda?
+                        <p class="text-zinc-500 text-sm leading-relaxed mb-3 line-clamp-2">
+                            Análise Técnica AYA: 6 ferramentas de IA postas à prova para realizar Deep Research sobre o
+                            livro "Por Que Nós Dormimos".
                         </p>
                         <div
-                            class="flex items-center gap-2 text-blue-400 text-xs font-semibold group-hover:gap-3 transition-all">
-                            <span>Ver resultados</span>
+                            class="flex items-center gap-2 text-white text-xs font-semibold group-hover:gap-3 transition-all">
+                            <span>Ver Dashboard</span>
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -770,263 +618,171 @@
                     </div>
                 </a>
 
-                <!-- Placeholder for future questions -->
-                <div class="coming-soon glass-card p-8 rounded-3xl opacity-40 border-dashed border-2 border-slate-700">
-                    <div class="flex items-center gap-6">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center">
-                            <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-slate-500 text-sm uppercase tracking-widest font-bold">Em breve</p>
-                            <p class="text-slate-600 text-sm mt-1">Mais conteúdos estão sendo preparados...</p>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
-    </section>
-
-    <!-- No Results Message (Hidden by default) -->
-    <div id="noResults" class="hidden text-center py-20 fade-in max-w-5xl mx-auto">
-        <div
-            class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800/50 mb-6 border border-white/5 animate-pulse">
-            <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-        </div>
-        <h3 class="text-2xl font-bold text-white mb-2">Nenhum resultado encontrado</h3>
-        <p class="text-slate-400">Tente buscar por palavras-chave diferentes.</p>
-        <button
-            onclick="document.getElementById('searchInput').value = ''; document.getElementById('searchInput').dispatchEvent(new Event('input'))"
-            class="mt-6 px-6 py-2 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/20 transition-all text-sm font-semibold">
-            Limpar busca
-        </button>
-    </div>
+    </main>
 
     <!-- Footer -->
-    <footer class="py-16 px-6 border-t border-white/5">
-        <div class="max-w-5xl mx-auto text-center">
-            <img src="assets/img/AYA.png" alt="AYA" class="logo-aya mx-auto mb-6 opacity-40">
-            <p class="text-slate-600 text-sm">
-                Sua jornada de aprendizado em IA começa aqui.
-            </p>
-            <p class="text-slate-700 text-xs mt-4">
-                © <span id="currentYearFooter">2026</span> AYA. Todos os direitos reservados.
-            </p>
+    <footer class="relative z-10 border-t border-white/5">
+        <div class="container mx-auto max-w-6xl px-6 py-16">
+            <!-- Main Footer Content -->
+            <div class="grid md:grid-cols-3 gap-12 mb-12">
+                <!-- Breno Lobato Section (Left - 2 columns) -->
+                <div class="space-y-4 md:col-span-2 reveal">
+                    <h3 class="text-white font-bold text-lg" style="text-shadow: 0 0 20px rgba(0,0,0,0.9);">Breno Lobato
+                    </h3>
+                    <p class="text-zinc-500 text-sm leading-relaxed max-w-2xl"
+                        style="text-shadow: 0 0 15px rgba(0,0,0,0.9);">
+                        Transformando empresas através da Inteligência Artificial. Treinamentos estratégicos e práticos
+                        para líderes e equipes que desejam liderar o futuro.
+                    </p>
+                    <a href="https://www.instagram.com/brenolvrabelo/" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 text-white hover:text-zinc-300 transition-colors group">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                        </svg>
+                        <span class="text-sm font-medium"
+                            style="text-shadow: 0 0 15px rgba(0,0,0,0.9);">@brenolvrabelo</span>
+                    </a>
+                </div>
+
+                <!-- AYA Section (Right - 1 column) -->
+                <div class="space-y-4 reveal">
+                    <img src="assets/img/AYA.png" alt="AYA" class="h-10 opacity-80">
+                    <p class="text-zinc-500 text-sm leading-relaxed" style="text-shadow: 0 0 15px rgba(0,0,0,0.9);">
+                        Central de Conhecimento sobre Inteligência Artificial, tecnologia e produtividade.
+                    </p>
+                    <a href="https://www.instagram.com/ayatech_br/" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 text-white hover:text-zinc-300 transition-colors group">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                        </svg>
+                        <span class="text-sm font-medium"
+                            style="text-shadow: 0 0 15px rgba(0,0,0,0.9);">@ayatech_br</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div
+                class="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 reveal">
+                <p class="text-zinc-600 text-base font-medium" style="text-shadow: 0 0 15px rgba(0,0,0,0.9);">© 2026 AYA
+                    Academy. Todos os direitos reservados.</p>
+                <div class="text-right">
+                    <p class="text-zinc-500 text-sm uppercase tracking-[0.4em] font-black leading-tight"
+                        style="text-shadow: 0 0 15px rgba(0,0,0,0.9);">
+                        The future is intelligence
+                    </p>
+                    <p class="text-zinc-700 text-[10px] uppercase tracking-[0.2em] font-bold">
+                        AYA Academy | Knowledge Hub
+                    </p>
+                </div>
+            </div>
         </div>
     </footer>
 
     <script>
-        // Auto-update article count
-        document.addEventListener('DOMContentLoaded', () => {
-            const count = document.querySelectorAll('.question-card').length;
-            const counterElement = document.getElementById('questionCount');
-            if (counterElement) {
-                counterElement.textContent = count;
-            }
-
-            // Auto-update dates
-            const now = new Date();
-            const year = now.getFullYear();
-            const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-            const month = monthNames[now.getMonth()];
-
-            const dateHeader = document.getElementById('currentDateHeader');
-            if (dateHeader) {
-                dateHeader.textContent = `${month} ${year}`;
-            }
-
-            const yearFooter = document.getElementById('currentYearFooter');
-            if (yearFooter) {
-                yearFooter.textContent = year;
-            }
-        });
-
-        // Initialize Lenis smooth scroll
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            orientation: 'vertical',
-            smoothWheel: true,
-        });
-
+        // Init Lenis smooth scroll
+        const lenis = new Lenis();
         function raf(time) {
             lenis.raf(time);
             requestAnimationFrame(raf);
         }
         requestAnimationFrame(raf);
 
-        // GSAP ScrollTrigger integration
-        gsap.registerPlugin(ScrollTrigger);
+        // Canvas Reveal Background Implementation (Final Center Reveal Version)
+        class CanvasRevealEffect {
+            constructor(canvasId, options = {}) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.dotSize = options.dotSize || 6;
+                this.gap = options.gap || 40;
+                this.speed = options.speed || 0.6; // Valor solicitado no componente
+                this.progress = 0;
+                this.dots = [];
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
 
-        lenis.on('scroll', ScrollTrigger.update);
+                this.lastTime = 0;
+                requestAnimationFrame((t) => this.animate(t));
+            }
 
-        gsap.ticker.add((time) => {
-            lenis.raf(time * 1000);
-        });
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.initDots();
+            }
 
-        gsap.ticker.lagSmoothing(0);
+            initDots() {
+                this.dots = [];
+                const cols = Math.ceil(this.canvas.width / this.gap);
+                const rows = Math.ceil(this.canvas.height / this.gap);
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                const maxDist = Math.sqrt(centerX ** 2 + centerY ** 2);
 
-        // Progress bar
-        const progressBar = document.querySelector('.progress-bar');
-        window.addEventListener('scroll', () => {
-            const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-            progressBar.style.transform = `scaleX(${scrollPercent})`;
-        });
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        const x = j * this.gap;
+                        const y = i * this.gap;
 
-        // Reveal animations
-        gsap.utils.toArray('.reveal-section').forEach((el) => {
-            gsap.to(el, {
-                opacity: 1,
-                y: 0,
-                duration: 1,
-                ease: 'power3.out',
-                scrollTrigger: {
-                    trigger: el,
-                    start: 'top 85%',
-                },
-            });
-        });
+                        // Normaliza distância de 0 a 1 em relação ao maior raio da tela
+                        const dx = x - centerX;
+                        const dy = y - centerY;
+                        const dist = Math.sqrt(dx * dx + dy * dy) / maxDist;
 
-        // Word Reveal Animation
-        const words = document.querySelectorAll('.word-reveal-word');
-        words.forEach((word, index) => {
-            setTimeout(() => {
-                word.classList.add('revealed');
-            }, 300 + (index * 150)); // 300ms initial delay, 150ms between each word
-        });
-
-        // Hero fade elements animation (after word reveal)
-        const heroFadeElements = document.querySelectorAll('.hero-fade');
-        heroFadeElements.forEach((el, index) => {
-            setTimeout(() => {
-                el.classList.add('visible');
-            }, 800 + (index * 200)); // Start after title animation, 200ms between each
-        });
-
-        gsap.from('.floating-badge', {
-            opacity: 0,
-            scale: 0.8,
-            duration: 1,
-            delay: 0.1,
-            ease: 'back.out(1.7)'
-        });
-
-        // Create floating particles
-        const particlesContainer = document.getElementById('particles');
-        const isMobile = window.innerWidth < 768;
-        const particleCount = isMobile ? 15 : 30;
-
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.classList.add('particle');
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 5 + 's';
-            particle.style.opacity = Math.random() * 0.5 + 0.2;
-            particlesContainer.appendChild(particle);
-
-            gsap.to(particle, {
-                y: -100 - Math.random() * 200,
-                x: (Math.random() - 0.5) * 100,
-                duration: 10 + Math.random() * 20,
-                repeat: -1,
-                ease: 'none',
-            });
-        }
-
-        // Search functionality - simplified to avoid display issues
-        const searchInput = document.getElementById('searchInput');
-        const questionsGrid = document.getElementById('questionsGrid');
-        const questionCards = questionsGrid.querySelectorAll('.question-card');
-
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            const comingSoonCard = document.querySelector('.coming-soon');
-            const noResults = document.getElementById('noResults');
-
-            let hasResults = false;
-
-            questionCards.forEach(card => {
-                const title = card.querySelector('h3').textContent.toLowerCase();
-                const description = card.querySelector('p').textContent.toLowerCase();
-                const category = card.querySelector('.category-badge').textContent.toLowerCase();
-
-                if (title.includes(query) || description.includes(query) || category.includes(query) || query === '') {
-                    card.style.display = 'flex'; // Restore display flex
-
-                    if (query !== '') {
-                        card.style.opacity = '0';
-                        card.style.transform = 'translateY(10px)';
-                        gsap.to(card, { opacity: 1, y: 0, duration: 0.4, clearProps: 'all' });
+                        this.dots.push({ x, y, dist });
                     }
-                    hasResults = true;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            // Toggle No Results Message
-            if (noResults) {
-                if (!hasResults && query !== '') {
-                    noResults.classList.remove('hidden');
-                    gsap.fromTo(noResults, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3 });
-                } else {
-                    noResults.classList.add('hidden');
                 }
             }
 
-            // Hide/Show "Coming Soon" card
-            if (comingSoonCard) {
-                if (query === '') {
-                    comingSoonCard.style.display = 'block';
-                    // Re-animate coming soon card when reappearing
-                    gsap.fromTo(comingSoonCard, { opacity: 0 }, { opacity: 0.4, duration: 0.5 });
-                } else {
-                    comingSoonCard.style.display = 'none';
+            animate(time) {
+                if (!this.lastTime) this.lastTime = time;
+                const delta = (time - this.lastTime) / 1000;
+                this.lastTime = time;
+
+                // Cresce até 1 e PARA (conforme lógica solicitada)
+                if (this.progress < 1) {
+                    this.progress = Math.min(this.progress + delta * this.speed, 1);
                 }
+
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.dots.forEach(dot => {
+                    // Lógica similar ao shader: reveal = smoothstep(u_progress, u_progress - 0.08, dist)
+                    // Como dist e progress estão normalizados de 0 a 1:
+                    let opacity = 0;
+                    const threshold = 0.08;
+
+                    if (dot.dist < this.progress) {
+                        // Smooth transition na borda do círculo de revelação
+                        if (dot.dist > this.progress - threshold) {
+                            opacity = (this.progress - dot.dist) / threshold;
+                        } else {
+                            opacity = 1;
+                        }
+                    }
+
+                    if (opacity > 0) {
+                        this.ctx.beginPath();
+                        this.ctx.arc(dot.x, dot.y, this.dotSize / 2, 0, Math.PI * 2);
+                        this.ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.15})`; // Reduzido de 0.4 para 0.15 para melhor legibilidade
+                        this.ctx.fill();
+                    }
+                });
+
+                requestAnimationFrame((t) => this.animate(t));
             }
-        });
-
-        // ==========================================
-        // AURORA BLOB - Follows Mouse
-        // ==========================================
-        const auroraBlob = document.getElementById('auroraBlob');
-        let mouseX = window.innerWidth / 2;
-        let mouseY = window.innerHeight / 2;
-        let blobX = mouseX;
-        let blobY = mouseY;
-
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-        });
-
-        // Smooth aurora movement
-        function animateAurora() {
-            // Smooth lerp (linear interpolation)
-            blobX += (mouseX - blobX) * 0.08;
-            blobY += (mouseY - blobY) * 0.08;
-
-            auroraBlob.style.left = blobX + 'px';
-            auroraBlob.style.top = blobY + 'px';
-
-            requestAnimationFrame(animateAurora);
         }
-        animateAurora();
 
-        // ==========================================
-        // MAGNETIC 3D CARDS
-        // ==========================================
-        const magneticCards = document.querySelectorAll('.magnetic-card');
+        // Inicializando com os parâmetros do CanvasCenterReveal: dotSize=6, speed=0.6
+        new CanvasRevealEffect('canvas-reveal-effect', { dotSize: 6, gap: 30, speed: 0.6 });
 
-        magneticCards.forEach(card => {
-            card.addEventListener('mousemove', (e) => {
+        // Magnetic card effect
+        document.querySelectorAll('.magnetic-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
                 const rect = card.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
@@ -1034,28 +790,67 @@
                 const centerX = rect.width / 2;
                 const centerY = rect.height / 2;
 
-                const rotateX = (y - centerY) / 15;
-                const rotateY = (centerX - x) / 15;
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
 
-                // Apply 3D rotation
-                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+                card.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+                card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
 
-                // Update shine position
-                const percentX = (x / rect.width) * 100;
-                const percentY = (y / rect.height) * 100;
-                card.style.setProperty('--mouse-x', percentX + '%');
-                card.style.setProperty('--mouse-y', percentY + '%');
+                gsap.to(card, {
+                    rotateX: rotateX,
+                    rotateY: rotateY,
+                    duration: 0.5,
+                    ease: "power2.out"
+                });
             });
 
             card.addEventListener('mouseleave', () => {
-                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+                gsap.to(card, {
+                    rotateX: 0,
+                    rotateY: 0,
+                    duration: 0.5,
+                    ease: "power2.out"
+                });
             });
         });
 
-        // Hide aurora on mobile (no mouse)
-        if ('ontouchstart' in window) {
-            auroraBlob.style.display = 'none';
-        }
+        // Reveal animations on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const cards = document.querySelectorAll('.magnetic-card');
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+
+            cards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const text = card.querySelector('p').textContent.toLowerCase();
+
+                if (title.includes(term) || text.includes(term)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Lucide Icons
+        lucide.createIcons();
     </script>
 </body>
 
